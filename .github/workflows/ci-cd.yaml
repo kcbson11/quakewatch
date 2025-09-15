@@ -57,3 +57,4 @@ jobs:
       - name: Deploy Helm chart
         run: |
           helm upgrade --install quakewatch ./quakewatch
+# Force push to trigger workflow run
