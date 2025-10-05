@@ -1,6 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: quakewatch-config
-data:
-  FLASK_ENV: production
