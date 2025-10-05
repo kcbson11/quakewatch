@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: quakewatch-deployment
 spec:
-  replicas: 2
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       app: quakewatch
@@ -14,8 +14,8 @@ spec:
     spec:
       containers:
         - name: quakewatch
-          image: quakewatch:latest
-          imagePullPolicy: Never  # Since we’ll use a locally built image
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: 5000
           envFrom:
