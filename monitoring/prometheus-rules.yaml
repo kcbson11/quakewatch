@@ -1,0 +1,27 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: quakewatch-alerts
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  groups:
+    - name: quakewatch.health
+      rules:
+        - alert: QuakewatchHttpDown
+          expr: probe_success{job="quakewatch-http"} == 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "QuakeWatch is unreachable"
+            description: "HTTP blackbox probe failed for 2 minutes."
+        - alert: HighPodRestarts
+          expr: increase(kube_pod_container_status_restarts_total{namespace="quakewatch-test"}[5m]) > 3
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Frequent restarts in quakewatch-test"
+            description: "Container {{ $labels.container }} in {{ $labels.pod }} restarted >3 times in 5m."
