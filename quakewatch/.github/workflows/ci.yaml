@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [ "main" ]
+  push:
+    branches: [ "main" ]
+
+jobs:
+  lint-python:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: { python-version: [ "3.10", "3.11" ] }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: ${{ matrix.python-version }} }
+      - run: pip install pylint
+      - run: |
+          if git ls-files '*.py' | grep .; then
+            python -m pylint $(git ls-files '*.py')
+          else
+            echo "No Python files found to lint."
+          fi
+
+  helm-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-helm@v4
+        with: { version: v3.14.4 }
+      - run: helm lint ./quakewatch
+
+  package-and-push-chart:
+    needs: [lint-python, helm-lint]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-helm@v4
+        with: { version: v3.14.4 }
+      - run: helm package ./quakewatch
+      - name: Login to GHCR (uses built-in token; no PAT needed)
+        run: echo ${{ secrets.GITHUB_TOKEN }} | helm registry login ghcr.io -u ${{ github.actor }} --password-stdin
+      - name: Push OCI chart
+        run: helm push $(ls *.tgz) oci://ghcr.io/${{ github.repository_owner }}/charts
