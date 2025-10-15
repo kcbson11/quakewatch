@@ -13,7 +13,19 @@ spec:
     matchLabels:
       app: quakewatch
   endpoints:
-    - port: http
-      path: /
+    - port: http          # service port name from your Service (targets container port 80)
+      path: /             # what to request
       interval: 30s
       scrapeTimeout: 10s
+      params:
+        module: [http_2xx]
+      relabelings:
+        # set the actual URL to probe
+        - targetLabel: __param_target
+          replacement: http://quakewatch-service.quakewatch-test.svc.cluster.local/
+        # show the target in labels
+        - sourceLabels: [__param_target]
+          targetLabel: instance
+        # send the scrape to the blackbox exporter service
+        - targetLabel: __address__
+          replacement: blackbox-prometheus-blackbox-exporter.monitoring.svc.cluster.local:9115
