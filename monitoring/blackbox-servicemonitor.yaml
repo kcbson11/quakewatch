@@ -1,0 +1,19 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: quakewatch-http-probe
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  jobLabel: quakewatch-http
+  namespaceSelector:
+    matchNames: ["quakewatch-test"]
+  selector:
+    matchLabels:
+      app: quakewatch
+  endpoints:
+    - port: http
+      path: /
+      interval: 30s
+      scrapeTimeout: 10s
