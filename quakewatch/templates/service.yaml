@@ -9,7 +9,8 @@ spec:
   selector:
     app: quakewatch
   ports:
-    - protocol: TCP
+    - name: http
+      protocol: TCP
       port: 80
       targetPort: http
       nodePort: 30010
