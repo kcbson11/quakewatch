@@ -1,0 +1,16 @@
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: quakewatch-http
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  jobName: quakewatch-http
+  prober:
+    url: blackbox-prometheus-blackbox-exporter.monitoring.svc.cluster.local:9115
+  module: http_2xx
+  targets:
+    staticConfig:
+      static:
+        - http://quakewatch-service.quakewatch-test.svc.cluster.local/
